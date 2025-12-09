@@ -31,13 +31,31 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174']; // Remove the trailing slash
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL, // add frontend domain when deployed
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS blocked'));
+  },
+  credentials: true,
+}));
+
+
 
 // middlewares
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+
 
 // api endpoints
 app.use('/api/admin', adminRouter);
